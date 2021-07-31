@@ -35,7 +35,23 @@ template = {
 
 content_folder = "content/"
 
+save_file = "save.json"
+save_progress : list = []
+
+def save(data) -> None:
+    with open(save_file, "w+") as fp:
+        json.dump(data, fp)
+
 def jobTask(jobQueue, content, style, booster_style=None):
+
+    global save_progress
+
+    if not os.path.exists(save_file):
+        save([])
+
+    with open(save_file) as fp:
+        save_progress = json.load(fp)
+
 
     if os.path.exists(content_folder):
 
@@ -46,12 +62,20 @@ def jobTask(jobQueue, content, style, booster_style=None):
         session_folder = f"outputset_{datetime.datetime.now().strftime('%m%d %H%M%S')}_{secrets.token_hex(4)}"
         
         for ix, image in enumerate(file_to_do):
+
+            if image in save_progress:
+                continue
+
+            save_progress.append(image)
+
             for iy, job in enumerate(jobQueue):
                 print(f"\n\n\n------------------------\n\n")
                 print(f"DOING PROCESS [{ix+1}][{iy+1}/{len(jobQueue)}] OF {len(file_to_do)}")
                 task = copy.deepcopy(job)
                 task["content_image"] = f"{content}/{image}"
                 callProcess(task, session_folder, style, booster_style)
+            
+                save(save_progress)
         
         print("\n\n\nProcess DONE")
         print("Press Enter to EXIT\n\n\n\n")

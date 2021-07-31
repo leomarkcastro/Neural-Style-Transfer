@@ -76,10 +76,12 @@ def callProcess(parameter, setname="output", style_folder="style", booster_style
     image = Image.new("RGB", img.size, (99,133,150))
     image.paste(img, (0, 0), img) 
 
+    image.thumbnail([300, 300], Image.ANTIALIAS)  # resizes the image to a lower resolution
+
     if not os.path.exists("proc"):
         os.makedirs('proc')
 
-    gray_image = f"proc/{secrets.token_hex(4)}_{content_source_raw}.png"
+    gray_image = f"proc/{secrets.token_hex(4)}_{content_source_raw}.jpg"
     
     image.save(gray_image)
 
